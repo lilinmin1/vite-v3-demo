@@ -1,7 +1,10 @@
+import { App } from "vue";
 // createWebHashHistory 创建一个 HTML5 历史，即单页面应用程序中最常见的历史记录
 // RouteRecordRaw 当用户通过 routes option 或者 router.addRoute() 来添加路由时，可以得到路由记录
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import { PageEnum } from "../enums/pageEnum";
+
+import { createRouterGuards } from './router-guards';
 
 /**
  * import.meta.glob 动态导入 构建时会分离为独立的chunk
@@ -19,7 +22,7 @@ Object.keys(modules).forEach((key) => {
 export const RootRoute: RouteRecordRaw = {
     path: "/",
     name: "Root",
-    redirect:PageEnum.BASE_HOME,
+    redirect: PageEnum.BASE_HOME,
     meta: {
         title: "Root"
     }
@@ -28,7 +31,7 @@ export const RootRoute: RouteRecordRaw = {
 export const LoginRoute: RouteRecordRaw = {
     path: "/login",
     name: 'Login',
-    component: () => import('@/views/login/indx.vue'),
+    component: () => import('@/views/login/index.vue'),
     meta: {
         title: '登录'
     }
@@ -38,13 +41,21 @@ export const LoginRoute: RouteRecordRaw = {
 export const asyncRoutes = [...routeModuleList]
 
 // 普通路由 无需验证权限
-export const constantRouter:any[] = [LoginRoute, RootRoute]
+export const constantRouter: any[] = [LoginRoute, RootRoute]
 
 const router = createRouter({
     history: createWebHashHistory(''),
     routes: constantRouter,
-
+    strict: true,
+    scrollBehavior: () => ({ left: 0, top: 0 })
 })
+
+
+export function setupRouter(app: App) {
+    app.use(router)
+    // 创建路由守卫
+    createRouterGuards(router);
+}
 
 
 export default router
